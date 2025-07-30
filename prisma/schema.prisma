@@ -1,0 +1,90 @@
+// prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  portfolios Portfolio[]
+  
+  @@map("users")
+}
+
+model Portfolio {
+  id        String   @id @default(cuid())
+  name      String   @default("Mon Portefeuille")
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  user     User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  holdings PortfolioHolding[]
+  
+  @@map("portfolios")
+}
+
+model PortfolioHolding {
+  id            String   @id @default(cuid())
+  portfolioId   String
+  coinId        String   // ID CoinGecko (ex: "bitcoin", "ethereum")
+  coinSymbol    String   // Symbole (ex: "BTC", "ETH")
+  coinName      String   // Nom complet
+  amount        Float    // Quantité détenue
+  buyPrice      Float    // Prix d'achat moyen
+  totalInvested Float    // Montant total investi
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  // Relations
+  portfolio    Portfolio     @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+  
+  @@map("portfolio_holdings")
+}
+
+model Transaction {
+  id        String          @id @default(cuid())
+  holdingId String
+  type      TransactionType
+  amount    Float           // Quantité
+  price     Float           // Prix unitaire
+  total     Float           // Montant total
+  date      DateTime        @default(now())
+  notes     String?
+  
+  // Relations
+  holding PortfolioHolding @relation(fields: [holdingId], references: [id], onDelete: Cascade)
+  
+  @@map("transactions")
+}
+
+model CryptoData {
+  id             String   @id // ID CoinGecko
+  symbol         String
+  name           String
+  currentPrice   Float
+  priceChange24h Float
+  marketCap      BigInt?
+  volume24h      BigInt?
+  lastUpdated    DateTime @default(now())
+  
+  @@map("crypto_data")
+}
+
+enum TransactionType {
+  BUY
+  SELL
+}

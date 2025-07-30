@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: crypto_portfolio
+      POSTGRES_USER: crypto_user
+      POSTGRES_PASSWORD: crypto_password_2024
+    ports:
+      - "5433:5432"  # Port différent pour éviter le conflit
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # Interface web pour gérer la base (optionnel)
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:
