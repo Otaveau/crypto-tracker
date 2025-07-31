@@ -70,9 +70,9 @@ export default function Home() {
                 
                 <div className="text-right">
                   <p className="text-white font-bold text-xl">
-                    {crypto.current_price.toLocaleString('fr-FR', {
+                    {crypto.current_price.toLocaleString('en-US', {
                       style: 'currency',
-                      currency: 'EUR'
+                      currency: 'USD'
                     })}
                   </p>
                   <p className={`text-sm ${

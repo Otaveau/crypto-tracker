@@ -3,14 +3,14 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   images: {
+    domains: [
+      'assets.coingecko.com',
+      'coin-images.coingecko.com',
+    ],
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'assets.coingecko.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'coin-images.coingecko.com',
+        hostname: '*.coingecko.com',
       },
     ],
   },
