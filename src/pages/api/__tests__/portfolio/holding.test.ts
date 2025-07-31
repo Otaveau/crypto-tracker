@@ -283,7 +283,7 @@ describe('/api/portfolio/holding', () => {
   describe('Unsupported methods', () => {
     it('should return 405 for unsupported HTTP methods', async () => {
       const { req, res } = createMocks({
-        method: 'PUT',
+        method: 'PATCH',
       })
 
       await handler(req, res)

@@ -4,9 +4,10 @@ import type { HoldingWithStats } from '@/types/dashboard';
 interface HoldingsListProps {
   holdings: HoldingWithStats[];
   onRemoveHolding: (holdingId: string) => void;
+  onEditHolding: (holding: HoldingWithStats) => void;
 }
 
-export default function HoldingsList({ holdings, onRemoveHolding }: HoldingsListProps) {
+export default function HoldingsList({ holdings, onRemoveHolding, onEditHolding }: HoldingsListProps) {
   if (holdings.length === 0) {
     return (
       <div className="text-center py-12">
@@ -26,7 +27,11 @@ export default function HoldingsList({ holdings, onRemoveHolding }: HoldingsList
   return (
     <div className="space-y-3">
       {holdings.map((holding) => (
-        <div key={holding.id} className="bg-white/5 rounded-lg p-5 hover:bg-white/8 transition-colors">
+        <div 
+          key={holding.id} 
+          className="bg-white/5 rounded-lg p-5 hover:bg-white/8 transition-colors cursor-pointer"
+          onClick={() => onEditHolding(holding)}
+        >
           {/* En-tête: Crypto + Bouton supprimer */}
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center space-x-3">
@@ -42,7 +47,10 @@ export default function HoldingsList({ holdings, onRemoveHolding }: HoldingsList
             </div>
             
             <button
-              onClick={() => onRemoveHolding(holding.id)}
+              onClick={(e) => {
+                e.stopPropagation();
+                onRemoveHolding(holding.id);
+              }}
               className="text-gray-500 hover:text-red-400 transition-colors p-2"
               title="Supprimer cette position"
             >

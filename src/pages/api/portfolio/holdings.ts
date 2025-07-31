@@ -95,8 +95,52 @@ export default async function handler(
       }
       break;
 
+    case 'PUT':
+      try {
+        const { holdingId, amount, buyPrice } = req.body;
+
+        if (!holdingId) {
+          return res.status(400).json({ 
+            message: 'ID de position requis' 
+          });
+        }
+
+        if (!amount || !buyPrice) {
+          return res.status(400).json({ 
+            message: 'Quantité et prix requis' 
+          });
+        }
+
+        const numAmount = parseFloat(amount);
+        const numBuyPrice = parseFloat(buyPrice);
+
+        if (isNaN(numAmount) || isNaN(numBuyPrice) || numAmount <= 0 || numBuyPrice <= 0) {
+          return res.status(400).json({ 
+            message: 'La quantité et le prix doivent être des nombres positifs' 
+          });
+        }
+
+        const updatedHolding = await PortfolioService.updateHolding(userId, holdingId, {
+          amount: numAmount,
+          buyPrice: numBuyPrice,
+        });
+
+        res.status(200).json(updatedHolding);
+      } catch (error) {
+        console.error('Erreur PUT portfolio:', error);
+        
+        if (error instanceof Error && error.message === 'Position non trouvée') {
+          res.status(404).json({ message: 'Position non trouvée' });
+        } else if (error instanceof Error) {
+          res.status(400).json({ message: error.message });
+        } else {
+          res.status(500).json({ message: 'Erreur serveur' });
+        }
+      }
+      break;
+
       default:
-        res.setHeader('Allow', ['GET', 'POST', 'DELETE']);
+        res.setHeader('Allow', ['GET', 'POST', 'DELETE', 'PUT']);
         res.status(405).json({ message: 'Méthode non autorisée' });
     }
   } catch (error) {

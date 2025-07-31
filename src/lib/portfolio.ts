@@ -163,6 +163,40 @@ export class PortfolioService {
     });
   }
 
+  // Modifier une position existante
+  static async updateHolding(userId: string, holdingId: string, data: { amount: number; buyPrice: number }) {
+    // Vérifier que l'utilisateur possède cette position
+    const portfolio = await this.ensureUserPortfolio(userId);
+    
+    const holding = await prisma.portfolioHolding.findFirst({
+      where: {
+        id: holdingId,
+        portfolioId: portfolio.id
+      }
+    });
+
+    if (!holding) {
+      throw new Error('Position non trouvée');
+    }
+
+    // Validation des données
+    if (data.amount <= 0 || data.buyPrice <= 0) {
+      throw new Error('La quantité et le prix doivent être des nombres positifs');
+    }
+
+    const totalInvested = data.amount * data.buyPrice;
+
+    return await prisma.portfolioHolding.update({
+      where: { id: holdingId },
+      data: {
+        amount: data.amount,
+        buyPrice: data.buyPrice,
+        totalInvested,
+        updatedAt: new Date()
+      }
+    });
+  }
+
   // Calculer les statistiques du portefeuille avec prix actuels
   static async getPortfolioStats(userId: string): Promise<{
     stats: PortfolioStats;

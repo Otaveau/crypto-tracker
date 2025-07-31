@@ -8,17 +8,20 @@ import { usePortfolio } from '@/hooks/usePortfolio';
 
 // Composants
 import AddCryptoModal from '@/components/AddCryptoModal';
+import EditCryptoModal from '@/components/EditCryptoModal';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import PortfolioStatsComponent from '@/components/dashboard/PortfolioStats';
 import HoldingsList from '@/components/dashboard/HoldingsList';
 
 // Types
-import type { AddCryptoData } from '@/types/dashboard';
+import type { AddCryptoData, HoldingWithStats } from '@/types/dashboard';
 
 export default function Dashboard() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedHolding, setSelectedHolding] = useState<HoldingWithStats | null>(null);
 
   // Hooks personnalisés
   const {
@@ -61,6 +64,43 @@ export default function Dashboard() {
       setShowAddModal(false);
     } catch (error) {
       // L'erreur est déjà gérée dans le hook
+    }
+  };
+
+  const handleEditHolding = (holding: HoldingWithStats) => {
+    setSelectedHolding(holding);
+    setShowEditModal(true);
+  };
+
+  const handleUpdateHolding = async (holdingId: string, data: { amount: number; buyPrice: number }) => {
+    try {
+      const response = await fetch('/api/portfolio/holdings', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          holdingId,
+          amount: data.amount,
+          buyPrice: data.buyPrice,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Erreur lors de la modification');
+      }
+
+      toast.success('Position modifiée avec succès !');
+      setShowEditModal(false);
+      setSelectedHolding(null);
+      
+      // Recharger les données
+      await loadPortfolioData();
+    } catch (error) {
+      console.error('Erreur modification:', error);
+      toast.error(error instanceof Error ? error.message : 'Erreur lors de la modification');
+      throw error;
     }
   };
 
@@ -132,7 +172,11 @@ export default function Dashboard() {
               </button>
             </div>
           ) : (
-            <HoldingsList holdings={holdings} onRemoveHolding={removeHolding} />
+            <HoldingsList 
+              holdings={holdings} 
+              onRemoveHolding={removeHolding}
+              onEditHolding={handleEditHolding}
+            />
           )}
         </div>
       </main>
@@ -142,6 +186,17 @@ export default function Dashboard() {
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}
         onAdd={handleAddCrypto}
+      />
+
+      {/* Modal d'édition */}
+      <EditCryptoModal
+        isOpen={showEditModal}
+        onClose={() => {
+          setShowEditModal(false);
+          setSelectedHolding(null);
+        }}
+        onUpdate={handleUpdateHolding}
+        holding={selectedHolding}
       />
     </div>
   );
