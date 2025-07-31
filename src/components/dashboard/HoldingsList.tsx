@@ -24,64 +24,49 @@ export default function HoldingsList({ holdings, onRemoveHolding }: HoldingsList
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       {holdings.map((holding) => (
-        <div key={holding.id} className="bg-white/5 rounded-xl p-6 hover:bg-white/10 transition-all duration-300 border border-white/10 hover:border-white/20">
-          {/* En-tête avec crypto et actions */}
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-lg">
-                <span className="text-white font-bold text-lg">
+        <div key={holding.id} className="bg-white/5 rounded-lg p-5 hover:bg-white/8 transition-colors">
+          {/* En-tête: Crypto + Bouton supprimer */}
+          <div className="flex items-start justify-between mb-4">
+            <div className="flex items-center space-x-3">
+              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                <span className="text-white font-bold">
                   {holding.coinSymbol.slice(0, 2).toUpperCase()}
                 </span>
               </div>
-              
               <div>
-                <h3 className="text-white font-bold text-lg">{holding.coinName}</h3>
-                <p className="text-gray-400 text-sm font-medium">{holding.coinSymbol.toUpperCase()}</p>
+                <h3 className="text-white font-semibold text-lg">{holding.coinName}</h3>
+                <p className="text-gray-400 text-sm">{holding.coinSymbol.toUpperCase()}</p>
               </div>
             </div>
-
+            
             <button
               onClick={() => onRemoveHolding(holding.id)}
-              className="text-gray-400 hover:text-red-400 transition-colors p-2 rounded-lg hover:bg-red-500/10"
+              className="text-gray-500 hover:text-red-400 transition-colors p-2"
               title="Supprimer cette position"
             >
-              <Trash2 size={20} />
+              <Trash2 size={18} />
             </button>
           </div>
 
-          {/* Grille des données */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-            {/* Quantité détenue */}
-            <div className="text-center p-4 bg-white/5 rounded-lg">
-              <p className="text-gray-400 text-sm font-medium mb-1">Quantité</p>
+          {/* Ligne principale: Informations importantes */}
+          <div className="grid grid-cols-4 gap-6 mb-3">
+            {/* Montant investi */}
+            <div className="text-center">
+              <p className="text-gray-400 text-xs font-medium mb-1">INVESTI</p>
               <p className="text-white font-bold text-lg">
-                {holding.amount.toLocaleString(undefined, {
-                  minimumFractionDigits: 0,
-                  maximumFractionDigits: 8
-                })}
-              </p>
-              <p className="text-gray-400 text-xs">{holding.coinSymbol.toUpperCase()}</p>
-            </div>
-
-            {/* Prix d'achat */}
-            <div className="text-center p-4 bg-white/5 rounded-lg">
-              <p className="text-gray-400 text-sm font-medium mb-1">Prix d'achat</p>
-              <p className="text-white font-bold text-lg">
-                {holding.buyPrice.toLocaleString('en-US', {
+                {holding.totalInvested.toLocaleString('en-US', {
                   style: 'currency',
-                  currency: 'USD',
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 6
+                  currency: 'USD'
                 })}
               </p>
             </div>
 
-            {/* Prix actuel */}
-            <div className="text-center p-4 bg-white/5 rounded-lg">
-              <p className="text-gray-400 text-sm font-medium mb-1">Prix actuel</p>
-              <p className="text-white font-bold text-lg">
+            {/* Prix actuel avec évolution */}
+            <div className="text-center">
+              <p className="text-gray-400 text-xs font-medium mb-1">PRIX ACTUEL</p>
+              <p className="text-white font-bold">
                 {holding.currentPrice.toLocaleString('en-US', {
                   style: 'currency',
                   currency: 'USD',
@@ -89,38 +74,70 @@ export default function HoldingsList({ holdings, onRemoveHolding }: HoldingsList
                   maximumFractionDigits: 6
                 })}
               </p>
-              <p className={`text-sm flex items-center justify-center mt-1 ${
+              <div className={`text-xs font-medium flex items-center justify-center mt-0.5 ${
                 holding.priceChange24h >= 0 ? 'text-green-400' : 'text-red-400'
               }`}>
                 {holding.priceChange24h >= 0 ? (
-                  <TrendingUp size={14} className="mr-1" />
+                  <TrendingUp size={12} className="mr-1" />
                 ) : (
-                  <TrendingDown size={14} className="mr-1" />
+                  <TrendingDown size={12} className="mr-1" />
                 )}
                 {holding.priceChange24h >= 0 ? '+' : ''}
-                {holding.priceChange24h.toFixed(2)}%
-              </p>
+                {holding.priceChange24h.toFixed(1)}% (24h)
+              </div>
             </div>
 
-            {/* Valeur & P&L */}
-            <div className="text-center p-4 bg-white/5 rounded-lg">
-              <p className="text-gray-400 text-sm font-medium mb-1">Valeur actuelle</p>
-              <p className="text-white font-bold text-lg">
+            {/* Valeur actuelle */}
+            <div className="text-center">
+              <p className="text-gray-400 text-xs font-medium mb-1">VALEUR ACTUELLE</p>
+              <p className="text-white font-bold text-xl">
                 {holding.currentValue.toLocaleString('en-US', {
                   style: 'currency',
                   currency: 'USD'
                 })}
               </p>
-              <p className={`text-sm font-semibold mt-1 ${
+            </div>
+
+            {/* Performance */}
+            <div className="text-center">
+              <p className="text-gray-400 text-xs font-medium mb-1">PERFORMANCE</p>
+              <p className={`font-bold text-xl ${
+                holding.profitPercentage >= 0 ? 'text-green-400' : 'text-red-400'
+              }`}>
+                {holding.profitPercentage >= 0 ? '+' : ''}{holding.profitPercentage.toFixed(1)}%
+              </p>
+              <p className={`text-sm font-medium ${
                 holding.profit >= 0 ? 'text-green-400' : 'text-red-400'
               }`}>
                 {holding.profit >= 0 ? '+' : ''}
                 {holding.profit.toLocaleString('en-US', {
                   style: 'currency',
                   currency: 'USD'
-                })} ({holding.profitPercentage >= 0 ? '+' : ''}{holding.profitPercentage.toFixed(2)}%)
+                })}
               </p>
             </div>
+          </div>
+
+          {/* Ligne secondaire: Détails techniques */}
+          <div className="flex items-center justify-center space-x-8 pt-2 border-t border-white/5">
+            <span className="text-gray-500 text-xs">
+              Quantité: <span className="text-gray-400 font-medium">
+                {holding.amount.toLocaleString(undefined, {
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 8
+                })} {holding.coinSymbol.toUpperCase()}
+              </span>
+            </span>
+            <span className="text-gray-500 text-xs">
+              Prix d'achat: <span className="text-gray-400 font-medium">
+                {holding.buyPrice.toLocaleString('en-US', {
+                  style: 'currency',
+                  currency: 'USD',
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 6
+                })}
+              </span>
+            </span>
           </div>
         </div>
       ))}
