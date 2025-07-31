@@ -10,13 +10,16 @@ export default function Home() {
   useEffect(() => {
     const fetchCryptos = async () => {
       try {
+        console.log('Début du chargement des cryptos...');
         setLoading(true);
         const data = await cryptoApi.getTopCryptos(5);
+        console.log('Données reçues:', data);
         setCryptos(data);
       } catch (err) {
+        console.error('Erreur lors du chargement:', err);
         setError('Impossible de charger les cryptos');
-        console.error(err);
       } finally {
+        console.log('Fin du chargement');
         setLoading(false);
       }
     };

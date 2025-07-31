@@ -12,7 +12,6 @@ export async function requireAuth(req: NextApiRequest, res: NextApiResponse) {
   const session = await getAuthSession(req, res);
   
   if (!session || !session.user) {
-    res.status(401).json({ message: 'Non autorisé' });
     return null;
   }
   

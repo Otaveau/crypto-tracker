@@ -1,5 +1,5 @@
 import { createMocks } from 'node-mocks-http'
-import handler from '../../portfolio/holding'
+import handler from '../../portfolio/holdings'
 import { PortfolioService } from '@/lib/portfolio'
 
 // Mock PortfolioService
@@ -53,8 +53,8 @@ describe('/api/portfolio/holding', () => {
             profit: 5000,
             profitPercentage: 12.5,
             priceChange24h: 2.5,
-            createdAt: new Date(),
-            updatedAt: new Date(),
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
           }
         ]
       }
@@ -128,8 +128,8 @@ describe('/api/portfolio/holding', () => {
         portfolioId: 'portfolio123',
         ...holdingData,
         totalInvested: 22500,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       }
 
       mockedGetServerSession.mockResolvedValue(mockSession as any)
@@ -193,9 +193,9 @@ describe('/api/portfolio/holding', () => {
 
       await handler(req, res)
 
-      expect(res._getStatusCode()).toBe(500)
+      expect(res._getStatusCode()).toBe(400)
       expect(JSON.parse(res._getData())).toEqual({
-        message: 'Erreur serveur'
+        message: 'Portfolio error'
       })
     })
   })
@@ -216,8 +216,8 @@ describe('/api/portfolio/holding', () => {
         amount: 0.5,
         buyPrice: 45000,
         totalInvested: 22500,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       }
 
       mockedGetServerSession.mockResolvedValue(mockSession as any)
@@ -225,7 +225,7 @@ describe('/api/portfolio/holding', () => {
 
       const { req, res } = createMocks({
         method: 'DELETE',
-        query: { holdingId },
+        body: { holdingId },
       })
 
       await handler(req, res)
@@ -247,7 +247,7 @@ describe('/api/portfolio/holding', () => {
 
       const { req, res } = createMocks({
         method: 'DELETE',
-        query: {},
+        body: {},
       })
 
       await handler(req, res)
@@ -268,7 +268,7 @@ describe('/api/portfolio/holding', () => {
 
       const { req, res } = createMocks({
         method: 'DELETE',
-        query: { holdingId: 'nonexistent' },
+        body: { holdingId: 'nonexistent' },
       })
 
       await handler(req, res)

@@ -240,10 +240,11 @@ export default function AddCryptoModal({ isOpen, onClose, onAdd }: AddCryptoModa
               {/* Form Fields */}
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label htmlFor="amount" className="block text-sm font-medium text-gray-300 mb-2">
                     Quantité détenue
                   </label>
                   <input
+                    id="amount"
                     type="number"
                     step="any"
                     value={amount}
@@ -255,10 +256,11 @@ export default function AddCryptoModal({ isOpen, onClose, onAdd }: AddCryptoModa
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label htmlFor="buyPrice" className="block text-sm font-medium text-gray-300 mb-2">
                     Prix d'achat ($)
                   </label>
                   <input
+                    id="buyPrice"
                     type="number"
                     step="any"
                     value={buyPrice}

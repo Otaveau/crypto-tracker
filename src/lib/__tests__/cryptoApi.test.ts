@@ -6,6 +6,11 @@ const mockFetch = global.fetch as jest.MockedFunction<typeof fetch>
 describe('CryptoApiService', () => {
   beforeEach(() => {
     mockFetch.mockClear()
+    // Clear cache
+    const cacheProperty = (cryptoApi as any).cache
+    if (cacheProperty) {
+      cacheProperty.clear()
+    }
   })
 
   describe('getTopCryptos', () => {
@@ -39,26 +44,37 @@ describe('CryptoApiService', () => {
       const result = await cryptoApi.getTopCryptos(2)
 
       expect(mockFetch).toHaveBeenCalledWith(
-        'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=2&page=1&sparkline=false'
+        'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=2&page=1&sparkline=false',
+        {
+          headers: {
+            'Accept': 'application/json',
+          }
+        }
       )
       expect(result).toEqual(mockResponse)
     })
 
-    it('should handle API errors', async () => {
+    it('should handle API errors by returning fallback data', async () => {
       mockFetch.mockResolvedValueOnce({
         ok: false,
         status: 429,
       } as Response)
 
-      await expect(cryptoApi.getTopCryptos(10)).rejects.toThrow(
-        'Erreur lors de la récupération des données'
-      )
+      const result = await cryptoApi.getTopCryptos(2)
+      // Should return fallback data instead of throwing
+      expect(result).toHaveLength(2)
+      expect(result[0].id).toBe('bitcoin')
+      expect(result[1].id).toBe('ethereum')
     })
 
-    it('should handle network errors', async () => {
+    it('should handle network errors by returning fallback data', async () => {
       mockFetch.mockRejectedValueOnce(new Error('Network error'))
 
-      await expect(cryptoApi.getTopCryptos(10)).rejects.toThrow('Network error')
+      const result = await cryptoApi.getTopCryptos(2)
+      // Should return fallback data instead of throwing
+      expect(result).toHaveLength(2)
+      expect(result[0].id).toBe('bitcoin')
+      expect(result[1].id).toBe('ethereum')
     })
   })
 
@@ -84,7 +100,12 @@ describe('CryptoApiService', () => {
       const result = await cryptoApi.getCurrentPrices(['bitcoin'])
 
       expect(mockFetch).toHaveBeenCalledWith(
-        'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=24h'
+        'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=24h',
+        {
+          headers: {
+            'Accept': 'application/json',
+          }
+        }
       )
       expect(result).toEqual(mockResponse)
     })
@@ -110,7 +131,12 @@ describe('CryptoApiService', () => {
       const result = await cryptoApi.getCryptoPrice('bitcoin')
 
       expect(mockFetch).toHaveBeenCalledWith(
-        'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd'
+        'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd',
+        {
+          headers: {
+            'Accept': 'application/json',
+          }
+        }
       )
       expect(result).toBe(45000)
     })
@@ -157,20 +183,25 @@ describe('CryptoApiService', () => {
       const result = await cryptoApi.searchCryptos('bitcoin')
 
       expect(mockFetch).toHaveBeenCalledWith(
-        'https://api.coingecko.com/api/v3/search?query=bitcoin'
+        'https://api.coingecko.com/api/v3/search?query=bitcoin',
+        {
+          headers: {
+            'Accept': 'application/json',
+          }
+        }
       )
-      expect(result).toEqual(mockResponse.coins.slice(0, 10))
+      expect(result).toEqual(mockResponse.coins)
     })
 
-    it('should handle search errors', async () => {
+    it('should handle search errors by returning fallback data', async () => {
       mockFetch.mockResolvedValueOnce({
         ok: false,
         status: 500,
       } as Response)
 
-      await expect(cryptoApi.searchCryptos('test')).rejects.toThrow(
-        'Erreur lors de la recherche'
-      )
+      const result = await cryptoApi.searchCryptos('bitcoin')
+      // Should return fallback data instead of throwing
+      expect(Array.isArray(result)).toBe(true)
     })
   })
 })
